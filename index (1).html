@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>财宝 - 大学生理财陪伴AI搭子</title>
+    <style>
+        :root {
+            --primary-color: #e8f5e9;
+            --primary-dark: #81c784;
+            --accent-color: #4caf50;
+            --bg-color: #f9faf9;
+            --white: #ffffff;
+            --text-main: #333333;
+            --text-light: #666666;
+            --border-color: #e0e0e0;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部导航 */
+        header {
+            background-color: var(--white);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* 主体布局 */
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            width: 280px;
+            background-color: var(--white);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .func-btn, .tone-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .func-btn:hover, .tone-btn:hover {
+            background-color: var(--primary-color);
+        }
+
+        .func-btn.active, .tone-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-dark);
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .custom-tone-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            display: none;
+            outline: none;
+        }
+        .custom-tone-input:focus { border-color: var(--accent-color); }
+
+        /* 聊天与表单公共区域 */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-color);
+            position: relative;
+        }
+
+        /* ================= 引导表单样式 ================= */
+        .setup-container {
+            flex: 1;
+            display: flex; /* 默认隐藏由JS控制 */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .setup-card {
+            background-color: var(--white);
+            padding: 32px;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .setup-card h2 {
+            font-size: 1.3rem;
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .setup-card p.subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-color);
+        }
+
+        .submit-btn {
+            background-color: var(--accent-color);
+            color: var(--white);
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.2s;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+
+        /* ================= 聊天界面样式 ================= */
+        .chat-interface {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .msg-row { display: flex; width: 100%; }
+        .msg-row.ai { justify-content: flex-start; }
+        .msg-row.user { justify-content: flex-end; }
+
+        .bubble {
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            line-height: 1.5;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+        }
+
+        .ai .bubble {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-top-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .user .bubble {
+            background-color: var(--primary-dark);
+            color: var(--white);
+            border-top-right-radius: 4px;
+        }
+
+        /* 底部输入区 */
+        .input-area {
+            padding: 20px 24px;
+            background-color: var(--white);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-tools { display: flex; justify-content: space-between; align-items: center; }
+        .clear-btn { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 0.9rem; }
+        .clear-btn:hover { color: #ff5252; }
+
+        .shortcut-area { display: flex; gap: 10px; }
+        .shortcut-btn {
+            background-color: var(--primary-color);
+            color: var(--accent-color);
+            border: 1px solid var(--primary-dark);
+            padding: 6px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .shortcut-btn:hover { background-color: var(--primary-dark); color: var(--white); }
+
+        .input-box { display: flex; gap: 12px; }
+        textarea {
+            flex: 1; height: 60px; padding: 12px; border: 1px solid var(--border-color);
+            border-radius: 10px; resize: none; outline: none; font-size: 0.95rem;
+        }
+        textarea:focus { border-color: var(--accent-color); }
+        .send-btn {
+            background-color: var(--accent-color); color: var(--white); border: none;
+            border-radius: 10px; padding: 0 24px; cursor: pointer; font-weight: bold; font-size: 1rem;
+        }
+        .send-btn:disabled { background-color: var(--text-light); cursor: not-allowed; }
+        .loading { font-size: 0.9rem; color: var(--text-light); display: none; padding: 10px 0; }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); max-height: 250px; padding: 15px; }
+            .bubble { max-width: 90%; }
+            .setup-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>财宝 - 大学生理财陪伴AI搭子</h1>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div>
+                <div class="section-title">功能模式 (切换不丢失进度)</div>
+                <div class="btn-group" id="func-group">
+                    <button class="func-btn active" data-mode="jizhang">💰 财宝记账</button>
+                    <button class="func-btn" data-mode="licai">📈 理财建议</button>
+                    <button class="func-btn" data-mode="fenxi">🔍 产品分析</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">财宝语气 (全局生效)</div>
+                <div class="btn-group" id="tone-group">
+                    <button class="tone-btn active" data-tone="温柔治愈">🌸 温柔治愈 (默认)</button>
+                    <button class="tone-btn" data-tone="简洁干练">⚡ 简洁干练</button>
+                    <button class="tone-btn" data-tone="活泼可爱">✨ 活泼可爱</button>
+                    <button class="tone-btn" data-tone="搞笑毒舌">🔥 搞笑毒舌</button>
+                    <button class="tone-btn" data-tone="custom">✏️ 自定义语气</button>
+                </div>
+                <input type="text" id="custom-tone-input" class="custom-tone-input" placeholder="请输入自定义语气描述，如：像古代掌柜一样说话">
+            </div>
+        </aside>
+
+        <main class="chat-area">
+            
+            <div class="setup-container" id="form-jizhang" style="display: none;">
+                <div class="setup-card">
+                    <h2>💰 建立你的专属账本</h2>
+                    <p class="subtitle">让财宝更了解你的财务状况</p>
+                    <div class="form-group">
+                        <label>每月总收入 / 生活费 (元)</label>
+                        <input type="number" id="jz-income" placeholder="例如：2000">
+                    </div>
+                    <div class="form-group">
+                        <label>月度目标结余 (元)</label>
+                        <input type="number" id="jz-target" placeholder="例如：500">
+                    </div>
+                    <div class="form-group">
+                        <label>是否有省钱心愿？(选填)</label>
+                        <input type="text" id="jz-wish" placeholder="例如：3个月后买一张演唱会门票">
+                    </div>
+                    <button class="submit-btn" onclick="submitJizhang()">开始记账</button>
+                </div>
+            </div>
+
+            <div class="setup-container" id="form-licai" style="display: none;">
+                <div class="setup-card">
+                    <h2>📈 定制理财方案</h2>
+                    <p class="subtitle">评估资产，科学匹配收益目标</p>
+                    <div class="form-group">
+                        <label>总资产 (元)</label>
+                        <input type="number" id="lc-assets" placeholder="例如：10000">
+                    </div>
+                    <div class="form-group">
+                        <label>每月结余/固定收入 (元)</label>
+                        <input type="number" id="lc-income" placeholder="例如：800">
+                    </div>
+                    <div class="form-group">
+                        <label>可用于理财的资金 (元)</label>
+                        <input type="number" id="lc-funds" placeholder="例如：5000">
+                    </div>
+                    <div class="form-group">
+                        <label>理财目标与风险偏好</label>
+                        <select id="lc-goal">
+                            <option value="稳健保值 (极低风险，收益较低)">稳健保值 (极低风险，如银行存款)</option>
+                            <option value="温和增值 (低风险，收益适中)">温和增值 (低风险，如纯债基金)</option>
+                            <option value="高收益进取 (中高风险，可能亏本)">高收益进取 (中高风险，如股票型基金)</option>
+                        </select>
+                    </div>
+                    <button class="submit-btn" onclick="submitLicai()">获取专属建议</button>
+                </div>
+            </div>
+
+            <div class="chat-interface" id="chat-interface" style="display: none;">
+                <div class="messages" id="chat-box">
+                    </div>
+                
+                <div class="input-area">
+                    <div class="input-tools">
+                        <span class="loading" id="loading-tip">财宝正在认真思考中...</span>
+                        <button class="clear-btn" id="clear-btn" title="清空对话并重置当前模块资料">🗑️ 重置当前功能对话</button>
+                    </div>
+                    
+                    <div class="shortcut-area" id="shortcut-area">
+                        <button class="shortcut-btn" onclick="triggerWishlist()">🎁 补充心愿单</button>
+                    </div>
+
+                    <div class="input-box">
+                        <textarea id="user-input" placeholder="和财宝说点什么..." onkeydown="handleEnter(event)"></textarea>
+                        <button class="send-btn" id="send-btn" onclick="sendMessage(false)">发送</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ==========================================
+        // ⚠️ API 配置区
+        // ==========================================
+        const API_KEY = "ark-773d5d7d-66d5-4a3e-bd2d-05e2166e7b1d-47ee0"; // 您的API Key
+        const API_URL = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
+        const MODEL_NAME = "doubao-seed-2-0-mini-260428";
+        
+        // ==========================================
+        // 系统提示词配置 (已根据表单前置逻辑更新)
+        // ==========================================
+        const SYSTEM_PROMPTS = {
+            jizhang: "你叫财宝，你是大学生专属理财陪伴搭子。用户已在表单中提供了月收入、目标结余和省钱心愿。请先针对他们提供的数据给予热情的反馈和财务评估；在后续对话中，用户会上报日常消费，请结合他们的目标结余精准分析消费是否合理。若用户存在心愿单，在他们想要冲动消费时，适时用心愿单来提醒和干预，提供延迟满足的情绪价值。语气严格按照用户选择的风格执行，不使用生涩金融术语。",
+            
+            licai: "你叫财宝，你是大学生专属理财顾问。用户已在系统里提交了总资产、每月收入、可理财资金和理财目标。请根据用户开场提供的数据，直接进行资产诊断，并匹配对应风险等级的理财产品组合。若用户选择高收益进取，必须严肃提示本金亏损的高风险。每次给出建议后，必须在回复最末尾独立换行附加免责声明：【本投资建议由AI生成，不保证完全准确，投资风险需投资者自行衡量承担】。语气严格按要求执行。",
+            
+            fenxi: "你叫财宝，专业严谨的理财产品风险分析助手，全程以谨慎保守为原则。用户发送产品介绍后，客观分析合规性与风险；若存在保本高息、疑似诈骗，果断劝阻，标注风险点，始终以资金安全为第一原则。语气严格按要求执行。"
+        };
+
+        const WELCOME_MESSAGES = {
+            fenxi: "你好！我是财宝，理财产品风险分析助手。请把你想了解的**理财产品介绍文本**发给我，我来帮你把关，警惕各类风险！"
+        };
+
+        // ==========================================
+        // 状态管理 (新增初始化卡口)
+        // ==========================================
+        let currentMode = 'jizhang';
+        let currentTone = '温柔治愈';
+        
+        // 记录各个模块是否已经填写过表单
+        let initStatus = {
+            jizhang: false,
+            licai: false,
+            fenxi: true // 分析模块不需要前置表单，默认已初始化
+        };
+
+        let chatHistories = {
+            jizhang: [],
+            licai: [],
+            fenxi: []
+        };
+
+        // ==========================================
+        // 初始化与事件绑定
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initFuncButtons();
+            initToneButtons();
+            // 清空按钮现在会重置整个模块的资料填写状态
+            document.getElementById('clear-btn').addEventListener('click', () => {
+                if(confirm("这将会清空当前功能的对话，并需要重新填写财务资料。确定吗？")){
+                    loadChat(true);
+                }
+            });
+            loadChat();
+        });
+
+        function initFuncButtons() {
+            const btns = document.querySelectorAll('.func-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    btns.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentMode = e.target.getAttribute('data-mode');
+                    loadChat(); 
+                });
+            });
+        }
+
+        function initToneButtons() {
+            const btns = document.querySelectorAll('.tone-btn');
+            const customInput = document.getElementById('custom-tone-input');
+            btns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    btns.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const tone = e.target.getAttribute('data-tone');
+                    if (tone === 'custom') {
+                        customInput.style.display = 'block';
+                        currentTone = customInput.value.trim() || '正常的';
+                    } else {
+                        customInput.style.display = 'none';
+                        currentTone = tone;
+                    }
+                });
+            });
+            customInput.addEventListener('input', (e) => {
+                if (document.querySelector('.tone-btn[data-tone="custom"]').classList.contains('active')) {
+                    currentTone = e.target.value.trim();
+                }
+            });
+        }
+
+        // ==========================================
+        // 表单提交与隐性自动触发逻辑
+        // ==========================================
+        function submitJizhang() {
+            const income = document.getElementById('jz-income').value;
+            const target = document.getElementById('jz-target').value;
+            const wish = document.getElementById('jz-wish').value || "暂无特定心愿";
+
+            if (!income || !target) {
+                alert("请填写每月总收入和目标结余哦~");
+                return;
+            }
+
+            initStatus.jizhang = true;
+            // 组合一段系统代发的用户消息，让大模型直接获取上下文
+            const autoMsg = `财宝你好！我刚设置了账本：我的每月总收入是 **${income}** 元，月度目标结余是 **${target}** 元。我的省钱心愿是：**${wish}**。请根据这些信息，给我一个初步的财务评估和鼓励吧！`;
+            
+            loadChat();
+            // 自动发送这条消息
+            triggerAutoMessage(autoMsg);
+        }
+
+        function submitLicai() {
+            const assets = document.getElementById('lc-assets').value;
+            const income = document.getElementById('lc-income').value;
+            const funds = document.getElementById('lc-funds').value;
+            const goal = document.getElementById('lc-goal').value;
+
+            if (!assets || !income || !funds) {
+                alert("请将金额信息填写完整哦~");
+                return;
+            }
+
+            initStatus.licai = true;
+            const autoMsg = `财宝你好！我需要理财建议。我的总资产是 **${assets}** 元，每月结余/收入是 **${income}** 元，目前可用于理财的闲置资金是 **${funds}** 元。我的理财目标和风险偏好是：**${goal}**。请基于这些数据，直接给我一套专属的资产配置方案和建议。`;
+            
+            loadChat();
+            triggerAutoMessage(autoMsg);
+        }
+
+        // 自动把生成的文本填入框并发送
+        async function triggerAutoMessage(text) {
+            const inputEl = document.getElementById('user-input');
+            inputEl.value = text;
+            await sendMessage(true); // true代表这是系统代发的初始化消息
+        }
+
+        function triggerWishlist() {
+            const inputEl = document.getElementById('user-input');
+            inputEl.value = "我有了新的心愿单🎁：我准备在[填写月数]个月后买一个[填写物品]，大概需要[填写金额]元。请帮我更新攒钱目标！";
+            inputEl.focus();
+        }
+
+        // ==========================================
+        // 核心路由与渲染引擎
+        // ==========================================
+        function loadChat(isManualClear = false) {
+            // 如果是清空，则重置当前模块的数据与表单状态
+            if (isManualClear) {
+                chatHistories[currentMode] = [];
+                if(currentMode !== 'fenxi') {
+                    initStatus[currentMode] = false; 
+                }
+            }
+            
+            // 1. 隐藏所有界面组件
+            document.getElementById('form-jizhang').style.display = 'none';
+            document.getElementById('form-licai').style.display = 'none';
+            document.getElementById('chat-interface').style.display = 'none';
+            document.getElementById('shortcut-area').style.display = 'none';
+            
+            // 2. 根据状态决定展示表单还是聊天室
+            if (currentMode === 'jizhang' && !initStatus.jizhang) {
+                document.getElementById('form-jizhang').style.display = 'flex';
+                return; // 拦截，不进入聊天室
+            }
+            if (currentMode === 'licai' && !initStatus.licai) {
+                document.getElementById('form-licai').style.display = 'flex';
+                return;
+            }
+
+            // 3. 渲染聊天室
+            document.getElementById('chat-interface').style.display = 'flex';
+            if (currentMode === 'jizhang') {
+                document.getElementById('shortcut-area').style.display = 'flex';
+            }
+            
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = ''; 
+            
+            // 对于分析模块，若为空，插入默认欢迎语
+            if (currentMode === 'fenxi' && chatHistories.fenxi.length === 0) {
+                appendMessage('ai', WELCOME_MESSAGES.fenxi);
+            } else {
+                chatHistories[currentMode].forEach(msg => {
+                    appendMessage(msg.role === 'user' ? 'user' : 'ai', msg.content);
+                });
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(false);
+            }
+        }
+
+        function appendMessage(role, text) {
+            const chatBox = document.getElementById('chat-box');
+            const row = document.createElement('div');
+            row.className = `msg-row ${role}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            let formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+            
+            bubble.innerHTML = formattedText;
+            row.appendChild(bubble);
+            chatBox.appendChild(row);
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage(isAutoInit = false) {
+            const inputEl = document.getElementById('user-input');
+            const text = inputEl.value.trim();
+            if (!text) return;
+
+            appendMessage('user', text);
+            inputEl.value = '';
+            
+            chatHistories[currentMode].push({ role: "user", content: text });
+
+            const sendBtn = document.getElementById('send-btn');
+            const loadingTip = document.getElementById('loading-tip');
+            sendBtn.disabled = true;
+            loadingTip.style.display = 'block';
+
+            const toneDesc = currentTone ? ` 当前的回复语气要求：【${currentTone}】。请严格用这种语气回复。` : '';
+            const fullSystemPrompt = SYSTEM_PROMPTS[currentMode] + toneDesc;
+
+            const apiMessages = [
+                { role: "system", content: fullSystemPrompt },
+                ...chatHistories[currentMode]
+            ];
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: apiMessages,
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 请求失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const aiReply = data.choices[0].message.content;
+
+                appendMessage('ai', aiReply);
+                chatHistories[currentMode].push({ role: "assistant", content: aiReply });
+
+            } catch (error) {
+                console.error("请求报错:", error);
+                appendMessage('ai', "⚠️ 财宝遇到了一点小麻烦，网络请求失败了。请检查控制台或确认API Key是否配置正确。");
+                chatHistories[currentMode].pop(); 
+            } finally {
+                sendBtn.disabled = false;
+                loadingTip.style.display = 'none';
+                document.getElementById('user-input').focus();
+            }
+        }
+    </script>
+</body>
+</html>
